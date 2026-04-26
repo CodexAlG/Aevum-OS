@@ -230,10 +230,10 @@ class _GremioScreenState extends State<GremioScreen> {
   void _completeMission(Map<String, dynamic> mission) {
     HapticFeedback.heavyImpact();
     
-    // Add XP to Provider
-    Provider.of<PlayerProvider>(context, listen: false).gainXp(mission['xp']);
+    // Llama a completarDesafio con el valor de XP
+    Provider.of<PlayerProvider>(context, listen: false).completarDesafio(mission['xp']);
     
-    // Update local state to trigger removal animation
+    // Animación de desvanecimiento
     setState(() {
       mission['isDone'] = true;
     });

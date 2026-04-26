@@ -38,15 +38,15 @@ class PlayerProvider with ChangeNotifier {
     _nextLevelXp = (100 * math.pow(_level, 1.5)).toInt();
   }
 
-  void gainXp(int amount) {
-    _xp += amount;
+  void completarDesafio(int xpGanada) {
+    _xp += xpGanada;
     
-    // Level Up Logic
+    // Lógica de Subida de Nivel
     while (_xp >= _nextLevelXp) {
       _xp -= _nextLevelXp;
       _level++;
       _calculateNextLevelXp();
-      // Healed slightly on level up
+      // Restauración de vitalidad al subir de nivel
       _hp = math.min(100, _hp + 20);
     }
     
