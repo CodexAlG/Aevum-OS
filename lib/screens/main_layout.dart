@@ -3,6 +3,7 @@ import 'package:aevum_os/screens/codice_screen.dart';
 import 'package:aevum_os/screens/nexo_screen.dart';
 import 'package:aevum_os/screens/gremio_screen.dart';
 import 'package:aevum_os/screens/logros_screen.dart';
+import 'package:aevum_os/widgets/mechanical_nav_bar.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -24,30 +25,36 @@ class _MainLayoutState extends State<MainLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'Códice',
+      extendBody: true,
+      body: Stack(
+        children: [
+          // 1. Optimized Screen content with IndexedStack and Fade
+          AnimatedOpacity(
+            duration: const Duration(milliseconds: 200),
+            opacity: 1.0,
+            child: IndexedStack(
+              index: _currentIndex,
+              children: _screens,
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Nexo',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.flash_on),
-            label: 'Gremio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events),
-            label: 'Logros',
+          
+          // 2. Isolated Custom Navigation (RepaintBoundary for 60FPS)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: RepaintBoundary(
+              child: MechanicalNavBar(
+                currentIndex: _currentIndex,
+                onTap: (index) {
+                  if (_currentIndex != index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  }
+                },
+              ),
+            ),
           ),
         ],
       ),

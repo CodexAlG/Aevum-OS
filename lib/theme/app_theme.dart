@@ -5,26 +5,27 @@ class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.surface,
-      cardTheme: CardTheme(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primary,
+        brightness: Brightness.dark,
+        surface: AppColors.surface,
+      ),
+      cardTheme: CardThemeData(
         color: AppColors.card,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
-          side: const BorderSide(color: AppColors.border, width: 1),
         ),
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.card,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textSub,
-        type: BottomNavigationBarType.fixed,
-        elevation: 8,
-      ),
+      fontFamily: 'Inter',
       textTheme: const TextTheme(
-        titleLarge: TextStyle(color: AppColors.textTitle, fontWeight: FontWeight.bold),
-        bodyMedium: TextStyle(color: AppColors.textSub),
+        headlineMedium: TextStyle(
+          color: AppColors.textTitle,
+          fontWeight: FontWeight.bold,
+        ),
+        bodyLarge: TextStyle(color: AppColors.textTitle),
+        bodySmall: TextStyle(color: AppColors.textSub),
       ),
     );
   }
