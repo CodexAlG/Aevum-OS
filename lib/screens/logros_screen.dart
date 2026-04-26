@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:aevum_os/providers/player_provider.dart';
 import 'package:aevum_os/theme/app_colors.dart';
 
 class LogrosScreen extends StatefulWidget {
@@ -12,175 +10,87 @@ class LogrosScreen extends StatefulWidget {
 
 class _LogrosScreenState extends State<LogrosScreen> {
   final List<Map<String, dynamic>> _achievements = [
-    {
-      'title': 'PRIMER PASO',
-      'desc': 'Completar el primer enfoque del día.',
-      'icon': Icons.flare,
-      'isUnlocked': true,
-    },
-    {
-      'title': 'DISCIPLINA DE HIERRO',
-      'desc': '7 días seguidos de hábitos perfectos.',
-      'icon': Icons.bolt,
-      'isUnlocked': true,
-    },
-    {
-      'title': 'MENTE CLARA',
-      'desc': '10 horas totales de meditación.',
-      'icon': Icons.self_improvement,
-      'isUnlocked': false,
-    },
-    {
-      'title': 'MAESTRO DEL CÓDICE',
-      'desc': 'Escribir 50 registros personales.',
-      'icon': Icons.auto_awesome,
-      'isUnlocked': false,
-    },
+    {'title': 'INICIO DE CICLO', 'desc': 'COMPLETAR ONBOARDING.', 'rarety': 'B', 'isUnlocked': true},
+    {'title': 'PRIMER LOGRO', 'desc': 'COMPLETAR UN DESAFÍO.', 'rarety': 'A', 'isUnlocked': true},
+    {'title': 'MAESTRO VOID', 'desc': '7 DÍAS DE ACTIVIDAD.', 'rarety': 'S', 'isUnlocked': false},
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: Consumer<PlayerProvider>(
-          builder: (context, player, child) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(),
-                  const SizedBox(height: 24),
-                  _buildStatsCard(player),
-                  const SizedBox(height: 32),
-                  _buildAchievementsList(),
-                ],
-              ),
-            );
-          },
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTitle(),
+              const SizedBox(height: 32),
+              _buildAchievementGrid(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return Column(
+  Widget _buildTitle() {
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'EL ARCHIVO',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textTitle,
-          ),
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.textTitle, letterSpacing: 2),
         ),
         Text(
-          'REGISTROS DE EVOLUCIÓN E INSIGNIAS',
-          style: TextStyle(
-            fontSize: 10,
-            color: AppColors.primary,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 2.0,
-          ),
+          'INSIGNIAS DE RANGO Y MÉRITO',
+          style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold, letterSpacing: 3),
         ),
       ],
     );
   }
 
-  Widget _buildStatsCard(PlayerProvider player) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'RANGO ACTUAL',
-                style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'Nivel ${player.level}',
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textTitle),
-              ),
-            ],
-          ),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'ESTADO',
-                style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'ÓPTIMO',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textTitle),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAchievementsList() {
+  Widget _buildAchievementGrid() {
     return Expanded(
       child: ListView.builder(
         itemCount: _achievements.length,
         padding: const EdgeInsets.only(bottom: 130),
-        physics: const BouncingScrollPhysics(),
-        itemBuilder: (context, index) {
-          return _buildAchievementCard(_achievements[index]);
-        },
+        itemBuilder: (context, index) => _buildAchievementTile(_achievements[index]),
       ),
     );
   }
 
-  Widget _buildAchievementCard(Map<String, dynamic> achievement) {
+  Widget _buildAchievementTile(Map<String, dynamic> achievement) {
     bool isUnlocked = achievement['isUnlocked'];
+    String rarety = achievement['rarety'];
+    Color raretyColor = rarety == 'S' ? AppColors.rankHigh : rarety == 'A' ? AppColors.rankMid : AppColors.rankLow;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 18),
+      margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: isUnlocked ? AppColors.card : AppColors.card.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(
-          color: isUnlocked ? AppColors.primary.withValues(alpha: 0.4) : AppColors.border,
-          width: 1,
-        ),
-        boxShadow: isUnlocked 
-          ? [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                blurRadius: 20,
-                spreadRadius: 2,
-              ),
-            ]
-          : [],
+        color: isUnlocked ? AppColors.card : AppColors.card.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: isUnlocked ? raretyColor.withValues(alpha: 0.3) : AppColors.border),
+        boxShadow: isUnlocked ? [
+          BoxShadow(color: raretyColor.withValues(alpha: 0.1), blurRadius: 20, spreadRadius: 2)
+        ] : [],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20.0),
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isUnlocked ? AppColors.primary.withValues(alpha: 0.1) : AppColors.border.withValues(alpha: 0.5),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                achievement['icon'],
-                color: isUnlocked ? AppColors.primary : AppColors.textSub,
-                size: 28,
+            ColorFiltered(
+              colorFilter: isUnlocked ? const ColorFilter.mode(Colors.transparent, BlendMode.multiply) : const ColorFilter.matrix(<double>[
+                0.2126, 0.7152, 0.0722, 0, 0,
+                0.2126, 0.7152, 0.0722, 0, 0,
+                0.2126, 0.7152, 0.0722, 0, 0,
+                0,      0,      0,      1, 0,
+              ]),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: raretyColor.withValues(alpha: 0.2), shape: BoxShape.circle),
+                child: Icon(Icons.stars, color: raretyColor, size: 32),
               ),
             ),
             const SizedBox(width: 20),
@@ -190,24 +100,17 @@ class _LogrosScreenState extends State<LogrosScreen> {
                 children: [
                   Text(
                     achievement['title'],
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: isUnlocked ? AppColors.textTitle : AppColors.textSub,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isUnlocked ? AppColors.textTitle : AppColors.textSub),
                   ),
+                  const SizedBox(height: 4),
                   Text(
                     achievement['desc'],
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isUnlocked ? AppColors.textSub : AppColors.textSub.withValues(alpha: 0.6),
-                    ),
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSub, letterSpacing: 1),
                   ),
                 ],
               ),
             ),
-            if (!isUnlocked)
-              const Icon(Icons.lock_outline, color: AppColors.textSub, size: 20),
+            if (!isUnlocked) const Icon(Icons.lock_outline, color: AppColors.border, size: 20),
           ],
         ),
       ),

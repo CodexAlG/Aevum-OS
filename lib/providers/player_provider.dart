@@ -7,11 +7,19 @@ class PlayerProvider with ChangeNotifier {
   int _xp = 0;
   int _hp = 100;
   int _nextLevelXp = 100;
+  
+  // Onboarding Data
+  String _priority = 'Enfoque';
+  String _difficulty = 'Medio';
+  bool _isInitialized = false;
 
   int get level => _level;
   int get xp => _xp;
   int get hp => _hp;
   int get nextLevelXp => _nextLevelXp;
+  String get priority => _priority;
+  String get difficulty => _difficulty;
+  bool get isInitialized => _isInitialized;
 
   PlayerProvider() {
     _loadData();
@@ -22,6 +30,10 @@ class PlayerProvider with ChangeNotifier {
     _level = prefs.getInt('level') ?? 1;
     _xp = prefs.getInt('xp') ?? 0;
     _hp = prefs.getInt('hp') ?? 100;
+    _priority = prefs.getString('priority') ?? 'Enfoque';
+    _difficulty = prefs.getString('difficulty') ?? 'Medio';
+    _isInitialized = prefs.getBool('isInitialized') ?? false;
+    
     _calculateNextLevelXp();
     notifyListeners();
   }
@@ -31,25 +43,31 @@ class PlayerProvider with ChangeNotifier {
     await prefs.setInt('level', _level);
     await prefs.setInt('xp', _xp);
     await prefs.setInt('hp', _hp);
+    await prefs.setString('priority', _priority);
+    await prefs.setString('difficulty', _difficulty);
+    await prefs.setBool('isInitialized', _isInitialized);
+  }
+
+  void initialize(String priority, String difficulty) {
+    _priority = priority;
+    _difficulty = difficulty;
+    _isInitialized = true;
+    _saveData();
+    notifyListeners();
   }
 
   void _calculateNextLevelXp() {
-    // Formula: 100 * level^1.5
     _nextLevelXp = (100 * math.pow(_level, 1.5)).toInt();
   }
 
   void completarDesafio(int xpGanada) {
     _xp += xpGanada;
-    
-    // Lógica de Subida de Nivel
     while (_xp >= _nextLevelXp) {
       _xp -= _nextLevelXp;
       _level++;
       _calculateNextLevelXp();
-      // Restauración de vitalidad al subir de nivel
       _hp = math.min(100, _hp + 20);
     }
-    
     _saveData();
     notifyListeners();
   }
@@ -64,6 +82,7 @@ class PlayerProvider with ChangeNotifier {
     _level = 1;
     _xp = 0;
     _hp = 100;
+    _isInitialized = false;
     _calculateNextLevelXp();
     _saveData();
     notifyListeners();

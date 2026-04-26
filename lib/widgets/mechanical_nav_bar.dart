@@ -17,10 +17,11 @@ class MechanicalNavBar extends StatefulWidget {
   State<MechanicalNavBar> createState() => _MechanicalNavBarState();
 }
 
-class _MechanicalNavBarState extends State<MechanicalNavBar> with SingleTickerProviderStateMixin {
+class _MechanicalNavBarState extends State<MechanicalNavBar> with TickerProviderStateMixin {
   late double _continuousValue;
   late AnimationController _snapController;
   late Animation<double> _snapAnimation;
+  late AnimationController _pulseController;
   
   bool _isDragging = false;
   int _lastHapticIndex = 1;
@@ -30,6 +31,7 @@ class _MechanicalNavBarState extends State<MechanicalNavBar> with SingleTickerPr
     super.initState();
     _continuousValue = widget.currentIndex / 3;
     _lastHapticIndex = widget.currentIndex;
+    
     _snapController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -42,6 +44,11 @@ class _MechanicalNavBarState extends State<MechanicalNavBar> with SingleTickerPr
         });
       }
     });
+
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
   }
 
   @override
@@ -63,6 +70,7 @@ class _MechanicalNavBarState extends State<MechanicalNavBar> with SingleTickerPr
   @override
   void dispose() {
     _snapController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
@@ -84,9 +92,7 @@ class _MechanicalNavBarState extends State<MechanicalNavBar> with SingleTickerPr
 
         return GestureDetector(
           onPanStart: (_) {
-            setState(() {
-              _isDragging = true;
-            });
+            setState(() => _isDragging = true);
             HapticFeedback.selectionClick();
           },
           onPanUpdate: (details) {
@@ -115,6 +121,7 @@ class _MechanicalNavBarState extends State<MechanicalNavBar> with SingleTickerPr
             child: Stack(
               clipBehavior: Clip.none,
               children: [
+                // 1. Luxury Mechanical Surface
                 Positioned.fill(
                   child: RepaintBoundary(
                     child: CustomPaint(
@@ -127,6 +134,7 @@ class _MechanicalNavBarState extends State<MechanicalNavBar> with SingleTickerPr
                   ),
                 ),
                 
+                // 2. High-Fidelity Tactical Icons
                 ...List.generate(4, (index) {
                   final double val = index / 3;
                   final angle = getAngleForValue(val);
@@ -148,20 +156,25 @@ class _MechanicalNavBarState extends State<MechanicalNavBar> with SingleTickerPr
                     left: x - 40,
                     top: y - 40,
                     width: 80,
-                    child: Transform.scale(
-                      scale: isNear || isActive ? 1.15 : 1.0,
+                    child: AnimatedScale(
+                      scale: isNear || isActive ? 1.25 : 1.0,
+                      duration: const Duration(milliseconds: 200),
                       child: Opacity(
                         opacity: isNear || isActive ? 1.0 : 0.5,
                         child: Icon(
                           icons[index],
                           color: isNear || isActive ? Colors.white : AppColors.textSub,
                           size: 40,
+                          shadows: isNear || isActive ? [
+                            Shadow(color: AppColors.primary.withValues(alpha: 0.5), blurRadius: 15)
+                          ] : null,
                         ),
                       ),
                     ),
                   );
                 }),
 
+                // 3. LED Tactical Selector (Energy Core)
                 Builder(
                   builder: (context) {
                     final angle = getAngleForValue(_continuousValue);
@@ -169,9 +182,9 @@ class _MechanicalNavBarState extends State<MechanicalNavBar> with SingleTickerPr
                     final y = centerY + radius * math.sin(angle);
 
                     return Positioned(
-                      left: x - 10,
-                      top: y - 10,
-                      child: _buildTacticalLED(),
+                      left: x - 15,
+                      top: y - 15,
+                      child: _buildEnergyCore(),
                     );
                   },
                 ),
@@ -183,31 +196,51 @@ class _MechanicalNavBarState extends State<MechanicalNavBar> with SingleTickerPr
     );
   }
 
-  Widget _buildTacticalLED() {
-    return Container(
-      width: 20,
-      height: 20,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white.withValues(alpha: 0.9),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.8),
-            blurRadius: 15,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Center(
-        child: Container(
-          width: 8,
-          height: 8,
-          decoration: const BoxDecoration(
+  Widget _buildEnergyCore() {
+    return AnimatedBuilder(
+      animation: _pulseController,
+      builder: (context, child) {
+        return Container(
+          width: 30,
+          height: 30,
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: AppColors.primary,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.3 * _pulseController.value),
+                blurRadius: 15,
+                spreadRadius: 5,
+              ),
+            ],
           ),
-        ),
-      ),
+          child: Center(
+            child: Container(
+              width: 12 + (4 * _pulseController.value),
+              height: 12 + (4 * _pulseController.value),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.8),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Container(
+                  width: 4,
+                  height: 4,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -227,34 +260,32 @@ class MechanicalBasePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Rect domeRect = Rect.fromCircle(center: Offset(centerX, centerY), radius: radius + 45);
     
+    // 1. Solid Clean Base (AppColors.card)
     final Paint basePaint = Paint()
+      ..color = AppColors.card
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(Path()..addArc(domeRect, math.pi, math.pi), basePaint);
+
+    // 2. Metallic Bezel (Relieve)
+    final Paint bezelPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          AppColors.card,
-          AppColors.card.withValues(alpha: 0.9),
-          AppColors.surface.withValues(alpha: 0.0),
+          Colors.white.withValues(alpha: 0.1),
+          Colors.transparent,
         ],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-    
-    final Path basePath = Path()
-      ..addArc(domeRect, math.pi, math.pi);
-    canvas.drawPath(basePath, basePaint);
+      ).createShader(domeRect)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    canvas.drawArc(domeRect, math.pi, math.pi, false, bezelPaint);
 
+    // 3. Subtle Precision Edge
     final Paint edgePaint = Paint()
       ..color = AppColors.border.withValues(alpha: 0.3)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.5;
     canvas.drawArc(domeRect, math.pi, math.pi, false, edgePaint);
-
-    final Paint groovePaint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.03)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 35;
-
-    final Rect trackRect = Rect.fromCircle(center: Offset(centerX, centerY), radius: radius);
-    canvas.drawArc(trackRect, math.pi + math.pi/4, math.pi/2, false, groovePaint);
   }
 
   @override
