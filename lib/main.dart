@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Aevum OS',
+      title: 'Aevum',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       home: const MainLayout(),

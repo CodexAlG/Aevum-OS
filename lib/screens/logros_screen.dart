@@ -21,7 +21,7 @@ class _LogrosScreenState extends State<LogrosScreen> {
       backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -36,16 +36,16 @@ class _LogrosScreenState extends State<LogrosScreen> {
   }
 
   Widget _buildTitle() {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'EL ARCHIVO',
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.textTitle, letterSpacing: 2),
+          style: Theme.of(context).textTheme.headlineMedium,
         ),
         Text(
           'INSIGNIAS DE RANGO Y MÉRITO',
-          style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold, letterSpacing: 3),
+          style: Theme.of(context).textTheme.labelSmall,
         ),
       ],
     );
@@ -70,14 +70,14 @@ class _LogrosScreenState extends State<LogrosScreen> {
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
         color: isUnlocked ? AppColors.card : AppColors.card.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(28),
         border: Border.all(color: isUnlocked ? raretyColor.withValues(alpha: 0.3) : AppColors.border),
         boxShadow: isUnlocked ? [
           BoxShadow(color: raretyColor.withValues(alpha: 0.1), blurRadius: 20, spreadRadius: 2)
         ] : [],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(24.0),
         child: Row(
           children: [
             ColorFiltered(
@@ -100,12 +100,17 @@ class _LogrosScreenState extends State<LogrosScreen> {
                 children: [
                   Text(
                     achievement['title'],
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isUnlocked ? AppColors.textTitle : AppColors.textSub),
+                    style: TextStyle(
+                      fontSize: 16, 
+                      fontWeight: FontWeight.bold, 
+                      color: isUnlocked ? AppColors.textTitle : AppColors.textSub,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     achievement['desc'],
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSub, letterSpacing: 1),
+                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSub, letterSpacing: 1),
                   ),
                 ],
               ),

@@ -39,16 +39,16 @@ class _GremioScreenState extends State<GremioScreen> {
   }
 
   Widget _buildTitle() {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'EL GREMIO',
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.textTitle, letterSpacing: 2),
+          style: Theme.of(context).textTheme.headlineMedium,
         ),
         Text(
           'DESAFÍOS TÁCTICOS DISPONIBLES',
-          style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold, letterSpacing: 3),
+          style: Theme.of(context).textTheme.labelSmall,
         ),
       ],
     );

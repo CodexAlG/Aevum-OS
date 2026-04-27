@@ -22,13 +22,13 @@ class NexoScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _buildTitle(context),
+                  const SizedBox(height: 32),
                   _buildHUD(player),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 40),
+                  _buildRadarChart(player),
+                  const SizedBox(height: 40),
                   _buildOracleSection(),
-                  const SizedBox(height: 32),
-                  _buildEvolutionChart(),
-                  const SizedBox(height: 32),
-                  _buildEnfoqueSection(player),
                 ],
               ),
             );
@@ -38,18 +38,27 @@ class NexoScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildTitle(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'EL NEXO',
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+        Text(
+          'CENTRO DE OPERACIONES Y ANÁLISIS',
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+      ],
+    );
+  }
+
   Widget _buildHUD(PlayerProvider player) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.card,
-            AppColors.card.withValues(alpha: 0.6),
-          ],
-        ),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(32),
         border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
         boxShadow: [
@@ -60,39 +69,81 @@ class NexoScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
-          _buildTacticalBadge('VITALIDAD', '${player.hp}%', AppColors.danger),
-          _buildCentralCore(player),
-          _buildTacticalBadge('EVOLUCIÓN', '${player.xp} XP', AppColors.primary),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildStreakBadge(player),
+              _buildCentralCore(player),
+              _buildLevelBadge(player),
+            ],
+          ),
+          const SizedBox(height: 24),
+          _buildXpBar(player),
         ],
       ),
     );
   }
 
-  Widget _buildTacticalBadge(String label, String value, Color color) {
+  Widget _buildStreakBadge(PlayerProvider player) {
     return Column(
       children: [
-        Text(
-          label,
+        const Icon(Icons.local_fire_department, color: AppColors.primary, size: 28),
+        const SizedBox(height: 4),
+        const Text(
+          'STREAK',
           style: TextStyle(
-            fontSize: 9,
+            fontSize: 8,
             fontWeight: FontWeight.w900,
-            color: color.withValues(alpha: 0.6),
-            letterSpacing: 2,
+            color: AppColors.textSub,
+            letterSpacing: 1,
+          ),
+        ),
+        Text(
+          '7 DÍAS',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            color: AppColors.textTitle,
+            shadows: [
+              Shadow(
+                color: AppColors.primary.withValues(alpha: 0.5),
+                blurRadius: 10,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLevelBadge(PlayerProvider player) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: AppColors.rankHigh.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Text(
+            'S',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: AppColors.rankHigh,
+            ),
           ),
         ),
         const SizedBox(height: 4),
         Text(
-          value,
-          style: TextStyle(
-            fontSize: 22,
+          'LVL ${player.level}',
+          style: const TextStyle(
+            fontSize: 12,
             fontWeight: FontWeight.w900,
             color: AppColors.textTitle,
-            shadows: [
-              Shadow(color: color.withValues(alpha: 0.5), blurRadius: 10),
-            ],
+            letterSpacing: 1,
           ),
         ),
       ],
@@ -108,15 +159,109 @@ class NexoScreen extends StatelessWidget {
           nextLevelXp: player.nextLevelXp,
           level: player.level,
         ),
-        Text(
-          '${player.level}',
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w900,
-            color: AppColors.textTitle,
+        const CircleAvatar(
+          radius: 35,
+          backgroundColor: Colors.transparent,
+          backgroundImage: AssetImage('assets/icon/icon.jpg'), // New Aevum Logo
+        ),
+      ],
+    );
+  }
+
+  Widget _buildXpBar(PlayerProvider player) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'EVOLUCIÓN DE NÚCLEO',
+              style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.textSub, letterSpacing: 1),
+            ),
+            Text(
+              '${player.xp} / ${player.nextLevelXp} XP',
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.primary, letterSpacing: 1),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: player.xp / player.nextLevelXp,
+            minHeight: 4,
+            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildRadarChart(PlayerProvider player) {
+    return Container(
+      height: 320,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.card.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'ANÁLISIS DE ATRIBUTOS',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              color: AppColors.primary,
+              letterSpacing: 3,
+            ),
+          ),
+          const SizedBox(height: 32),
+          Expanded(
+            child: RadarChart(
+              RadarChartData(
+                radarShape: RadarShape.polygon,
+                radarBorderData: const BorderSide(color: Colors.transparent),
+                gridBorderData: BorderSide(color: AppColors.textSub.withValues(alpha: 0.2), width: 1),
+                tickBorderData: const BorderSide(color: Colors.transparent),
+                ticksTextStyle: const TextStyle(color: Colors.transparent),
+                tickCount: 3,
+                titlePositionPercentageOffset: 0.2,
+                titleTextStyle: const TextStyle(color: AppColors.textSub, fontSize: 10, fontWeight: FontWeight.bold),
+                getTitle: (index, angle) {
+                  switch (index) {
+                    case 0: return const RadarChartTitle(text: 'FUERZA');
+                    case 1: return const RadarChartTitle(text: 'LÓGICA');
+                    case 2: return const RadarChartTitle(text: 'SABIDURÍA');
+                    case 3: return const RadarChartTitle(text: 'CONSTANCIA');
+                    case 4: return const RadarChartTitle(text: 'ENFOQUE');
+                    case 5: return const RadarChartTitle(text: 'VITALIDAD');
+                    default: return const RadarChartTitle(text: '');
+                  }
+                },
+                dataSets: [
+                  RadarDataSet(
+                    fillColor: AppColors.primary.withValues(alpha: 0.4),
+                    borderColor: AppColors.primary,
+                    borderWidth: 2,
+                    entryRadius: 3,
+                    dataEntries: [
+                      const RadarEntry(value: 80), // Fuerza
+                      const RadarEntry(value: 65), // Lógica
+                      const RadarEntry(value: 90), // Sabiduría
+                      const RadarEntry(value: 70), // Constancia
+                      const RadarEntry(value: 85), // Enfoque
+                      const RadarEntry(value: 60), // Vitalidad
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -142,16 +287,16 @@ class NexoScreen extends StatelessWidget {
 
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: AppColors.card.withValues(alpha: 0.4),
+            color: AppColors.card,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+            border: Border.all(color: AppColors.border.withValues(alpha: 0.1)),
           ),
           child: Column(
             children: [
               Icon(categoryIcon, color: AppColors.primary, size: 24),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               Text(
                 quote ?? '',
                 textAlign: TextAlign.center,
@@ -159,16 +304,16 @@ class NexoScreen extends StatelessWidget {
                   color: AppColors.textSub,
                   fontSize: 14,
                   fontStyle: FontStyle.italic,
-                  height: 1.5,
+                  height: 1.6,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Text(
                 category?.toUpperCase() ?? '',
                 style: TextStyle(
                   fontSize: 8,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.primary.withValues(alpha: 0.5),
+                  color: AppColors.primary.withValues(alpha: 0.4),
                   letterSpacing: 2,
                 ),
               ),
@@ -176,106 +321,6 @@ class NexoScreen extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildEvolutionChart() {
-    return Container(
-      height: 200,
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'EVOLUCIÓN TEMPORAL',
-            style: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w900,
-              color: AppColors.primary,
-              letterSpacing: 2,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: LineChart(
-              LineChartData(
-                gridData: const FlGridData(show: false),
-                titlesData: const FlTitlesData(show: false),
-                borderData: FlBorderData(show: false),
-                lineBarsData: [
-                  LineChartBarData(
-                    isCurved: true,
-                    color: AppColors.primary,
-                    barWidth: 3,
-                    isStrokeCapRound: true,
-                    dotData: const FlDotData(show: false),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      color: AppColors.primary.withValues(alpha: 0.2),
-                    ),
-                    spots: const [
-                      FlSpot(0, 30),
-                      FlSpot(1, 45),
-                      FlSpot(2, 40),
-                      FlSpot(3, 60),
-                      FlSpot(4, 55),
-                      FlSpot(5, 80),
-                      FlSpot(6, 75),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEnfoqueSection(PlayerProvider player) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'ENFOQUE DEL DÍA',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w900,
-            color: AppColors.textSub,
-            letterSpacing: 5,
-          ),
-        ),
-        const SizedBox(height: 24),
-        _buildRPGCard(title: 'Meditación Matutina', xp: 50, player: player),
-        _buildRPGCard(title: 'Lectura Técnica', xp: 120, player: player),
-        _buildRPGCard(title: 'Entrenamiento Épico', xp: 250, player: player),
-      ],
-    );
-  }
-
-  Widget _buildRPGCard({required String title, required int xp, required PlayerProvider player}) {
-    Color rankColor = xp <= 50 ? AppColors.rankLow : xp <= 150 ? AppColors.rankMid : AppColors.rankHigh;
-    String rankLetter = xp <= 50 ? 'B' : xp <= 150 ? 'A' : 'S';
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-      ),
-      child: ListTile(
-        onTap: () => player.completarDesafio(xp),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textTitle)),
-        subtitle: Text('RANGO $rankLetter', style: TextStyle(fontSize: 10, color: rankColor, fontWeight: FontWeight.bold, letterSpacing: 1)),
-        trailing: Text('+$xp', style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.textTitle)),
-      ),
     );
   }
 }
