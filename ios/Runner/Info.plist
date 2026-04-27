@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Aevum requiere acceso al micrófono para dictado de notas.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Aevum requiere acceso al reconocimiento de voz para convertir dictados en texto.</string>
 </dict>
 </plist>

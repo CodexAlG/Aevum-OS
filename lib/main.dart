@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:aevum_os/providers/player_provider.dart';
 import 'package:aevum_os/providers/mission_provider.dart';
+import 'package:aevum_os/providers/dailys_provider.dart';
+import 'package:aevum_os/providers/note_provider.dart';
 import 'package:aevum_os/theme/app_theme.dart';
 import 'package:aevum_os/screens/main_layout.dart';
 
@@ -11,6 +13,8 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => PlayerProvider()),
         ChangeNotifierProvider(create: (_) => MissionProvider()),
+        ChangeNotifierProvider(create: (_) => DailysProvider()),
+        ChangeNotifierProvider(create: (_) => NoteProvider()),
       ],
       child: const MyApp(),
     ),

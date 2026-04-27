@@ -5,6 +5,7 @@ import 'dart:convert';
 class Mission {
   final String id;
   final String title;
+  final String description;
   final String category;
   final int xp;
   final String rank;
@@ -13,6 +14,7 @@ class Mission {
   Mission({
     required this.id,
     required this.title,
+    this.description = '',
     required this.category,
     required this.xp,
     required this.rank,
@@ -22,6 +24,7 @@ class Mission {
   Map<String, dynamic> toJson() => {
     'id': id,
     'title': title,
+    'description': description,
     'category': category,
     'xp': xp,
     'rank': rank,
@@ -31,6 +34,7 @@ class Mission {
   factory Mission.fromJson(Map<String, dynamic> json) => Mission(
     id: json['id'],
     title: json['title'],
+    description: json['description'] ?? '',
     category: json['category'],
     xp: json['xp'],
     rank: json['rank'],
@@ -54,11 +58,10 @@ class MissionProvider with ChangeNotifier {
       final List<dynamic> decoded = jsonDecode(missionsJson);
       _missions = decoded.map((m) => Mission.fromJson(m)).toList();
     } else {
-      // Default missions
       _missions = [
-        Mission(id: '1', title: 'HIDRATACIÓN', category: 'Diarias', xp: 50, rank: 'B'),
-        Mission(id: '2', title: 'LECTURA TÉCNICA', category: 'Diarias', xp: 120, rank: 'A'),
-        Mission(id: '3', title: 'CÓDIGO PURO', category: 'Corto Plazo', xp: 300, rank: 'S'),
+        Mission(id: '1', title: 'HIDRATACIÓN', description: 'Beber al menos 2 litros de agua al día.', category: 'Diarias', xp: 50, rank: 'E'),
+        Mission(id: '2', title: 'LECTURA TÉCNICA', description: 'Leer documentación o artículos de ingeniería.', category: 'Diarias', xp: 120, rank: 'B'),
+        Mission(id: '3', title: 'CÓDIGO PURO', description: 'Completar un módulo funcional sin deuda técnica.', category: 'Corto Plazo', xp: 300, rank: 'S'),
       ];
     }
     notifyListeners();
@@ -72,6 +75,12 @@ class MissionProvider with ChangeNotifier {
 
   void addMission(Mission mission) {
     _missions.add(mission);
+    _saveMissions();
+    notifyListeners();
+  }
+
+  void deleteMission(String id) {
+    _missions.removeWhere((m) => m.id == id);
     _saveMissions();
     notifyListeners();
   }
