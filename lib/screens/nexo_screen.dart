@@ -161,8 +161,8 @@ class NexoScreen extends StatelessWidget {
         ),
         const CircleAvatar(
           radius: 35,
-          backgroundColor: Colors.transparent,
-          backgroundImage: AssetImage('assets/icon/icon.jpg'), // New Aevum Logo
+          backgroundColor: AppColors.surface,
+          backgroundImage: AssetImage('assets/icon/logo_foreground.png'), // New Aevum Logo (Transparent)
         ),
       ],
     );
