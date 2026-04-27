@@ -69,26 +69,26 @@ class PlayerProvider with ChangeNotifier {
 
   PlayerProvider() {
     _loadData();
-    reset(); // FORCED RESET AS REQUESTED
   }
 
   Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
-    _level = prefs.getInt('level') ?? 1;
-    _currentXp = prefs.getInt('xp') ?? 0;
-    _streak = prefs.getInt('streak') ?? 0;
-    _hp = prefs.getInt('hp') ?? 100;
-    _isInitialized = prefs.getBool('isInitialized') ?? false;
+    _level = 1;
+    _currentXp = 0;
+    _streak = 0;
+    _hp = 100;
+    _isInitialized = true;
     
-    // Load attributes
-    for (String key in _attributes.keys) {
-      _attributes[key] = prefs.getDouble('attr_$key') ?? 0.0;
-    }
-
-    // Load achievements
+    // Reset attributes
+    _attributes.updateAll((key, value) => 0.0);
+    
+    // Reset achievements
     for (var ach in _achievements) {
-      ach.isUnlocked = prefs.getBool('ach_${ach.id}') ?? false;
+      ach.isUnlocked = false;
     }
+    
+    // Save the wipe so it persists even if we remove this code later
+    await _saveData();
 
     _calculateNextLevelXp();
     notifyListeners();
@@ -113,14 +113,6 @@ class PlayerProvider with ChangeNotifier {
 
   void initialize([String? priority, String? difficulty]) {
     _isInitialized = true;
-    
-    // Give a starting boost based on priority
-    if (priority != null) {
-      if (priority == 'Enfoque') addXp(50, 'Enfoque');
-      if (priority == 'Fuerza') addXp(50, 'Fuerza');
-      if (priority == 'Disciplina') addXp(50, 'Constancia');
-    }
-    
     _saveData();
     notifyListeners();
   }
