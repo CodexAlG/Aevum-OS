@@ -101,7 +101,7 @@ class NexoScreen extends StatelessWidget {
           ),
         ),
         Text(
-          '7 DÍAS',
+          '${player.streak} DÍAS',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w900,
@@ -155,7 +155,7 @@ class NexoScreen extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         XpHaloAvatar(
-          xp: player.xp,
+          xp: player.currentXp,
           nextLevelXp: player.nextLevelXp,
           level: player.level,
         ),
@@ -179,7 +179,7 @@ class NexoScreen extends StatelessWidget {
               style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.textSub, letterSpacing: 1),
             ),
             Text(
-              '${player.xp} / ${player.nextLevelXp} XP',
+              '${player.currentXp} / ${player.nextLevelXp} XP',
               style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.primary, letterSpacing: 1),
             ),
           ],
@@ -188,7 +188,7 @@ class NexoScreen extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
-            value: player.xp / player.nextLevelXp,
+            value: player.currentXp / player.nextLevelXp,
             minHeight: 4,
             backgroundColor: AppColors.primary.withValues(alpha: 0.1),
             valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
@@ -199,6 +199,7 @@ class NexoScreen extends StatelessWidget {
   }
 
   Widget _buildRadarChart(PlayerProvider player) {
+    final attrs = player.attributes;
     return Container(
       height: 320,
       padding: const EdgeInsets.all(24),
@@ -248,12 +249,12 @@ class NexoScreen extends StatelessWidget {
                     borderWidth: 2,
                     entryRadius: 3,
                     dataEntries: [
-                      const RadarEntry(value: 80), // Fuerza
-                      const RadarEntry(value: 65), // Lógica
-                      const RadarEntry(value: 90), // Sabiduría
-                      const RadarEntry(value: 70), // Constancia
-                      const RadarEntry(value: 85), // Enfoque
-                      const RadarEntry(value: 60), // Vitalidad
+                      RadarEntry(value: attrs['Fuerza'] ?? 0),
+                      RadarEntry(value: attrs['Logica'] ?? 0),
+                      RadarEntry(value: attrs['Sabiduria'] ?? 0),
+                      RadarEntry(value: attrs['Constancia'] ?? 0),
+                      RadarEntry(value: attrs['Enfoque'] ?? 0),
+                      RadarEntry(value: attrs['Vitalidad'] ?? 0),
                     ],
                   ),
                 ],

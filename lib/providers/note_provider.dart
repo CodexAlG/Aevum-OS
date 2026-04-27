@@ -46,20 +46,7 @@ class NoteProvider with ChangeNotifier {
       final List<dynamic> decoded = jsonDecode(notesJson);
       _notes = decoded.map((n) => Note.fromJson(n)).toList();
     } else {
-      _notes = [
-        Note(
-          id: '1',
-          title: 'PROTOCOLO AURORA',
-          content: 'Sincronización inicial completada. El sistema Aevum está operativo en su fase 2.0. La identidad visual ha sido unificada.',
-          date: '26 ABRIL',
-        ),
-        Note(
-          id: '2',
-          title: 'REGISTRO DE ENFOQUE',
-          content: 'Se recomienda mantener ciclos de 90 minutos de trabajo profundo seguidos de 15 minutos de recuperación activa.',
-          date: '25 ABRIL',
-        ),
-      ];
+      _notes = []; // Empty by default
     }
     notifyListeners();
   }
@@ -82,6 +69,21 @@ class NoteProvider with ChangeNotifier {
     ));
     _saveNotes();
     notifyListeners();
+  }
+
+  void updateNote(String id, String title, String content) {
+    final index = _notes.indexWhere((n) => n.id == id);
+    if (index != -1) {
+      final oldNote = _notes[index];
+      _notes[index] = Note(
+        id: oldNote.id,
+        title: title.toUpperCase(),
+        content: content,
+        date: oldNote.date,
+      );
+      _saveNotes();
+      notifyListeners();
+    }
   }
 
   void removeNote(String id) {

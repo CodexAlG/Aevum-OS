@@ -2,23 +2,69 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+class Achievement {
+  final String id;
+  final String titulo;
+  final String descripcion;
+  bool isUnlocked;
+  final String condicion; // e.g., 'level_2', 'first_mission'
+
+  Achievement({
+    required this.id,
+    required this.titulo,
+    required this.descripcion,
+    this.isUnlocked = false,
+    required this.condicion,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'titulo': titulo,
+    'descripcion': descripcion,
+    'isUnlocked': isUnlocked,
+    'condicion': condicion,
+  };
+
+  factory Achievement.fromJson(Map<String, dynamic> json) => Achievement(
+    id: json['id'],
+    titulo: json['titulo'],
+    descripcion: json['descripcion'],
+    isUnlocked: json['isUnlocked'] ?? false,
+    condicion: json['condicion'],
+  );
+}
+
 class PlayerProvider with ChangeNotifier {
   int _level = 1;
-  int _xp = 0;
-  int _hp = 100;
+  int _currentXp = 0;
   int _nextLevelXp = 100;
+  int _streak = 0;
+  int _hp = 100;
   
-  // Onboarding Data
-  String _priority = 'Enfoque';
-  String _difficulty = 'Medio';
+  Map<String, double> _attributes = {
+    'Fuerza': 0,
+    'Logica': 0,
+    'Sabiduria': 0,
+    'Constancia': 0,
+    'Enfoque': 0,
+    'Vitalidad': 0
+  };
+
+  List<Achievement> _achievements = [
+    Achievement(id: 'lv2', titulo: 'NIVEL 2 ALCANZADO', descripcion: 'Has superado el umbral inicial.', condicion: 'level_2'),
+    Achievement(id: 'm1', titulo: 'PRIMERA MISIÓN', descripcion: 'Completaste tu primer desafío en el Gremio.', condicion: 'first_mission'),
+  ];
+
+  // Onboarding/System Data
   bool _isInitialized = false;
 
   int get level => _level;
-  int get xp => _xp;
-  int get hp => _hp;
+  int get currentXp => _currentXp;
   int get nextLevelXp => _nextLevelXp;
-  String get priority => _priority;
-  String get difficulty => _difficulty;
+  int get streak => _streak;
+  int get hp => _hp;
+  Map<String, double> get attributes => _attributes;
+  List<Achievement> get achievements => _achievements;
   bool get isInitialized => _isInitialized;
 
   PlayerProvider() {
@@ -28,12 +74,21 @@ class PlayerProvider with ChangeNotifier {
   Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
     _level = prefs.getInt('level') ?? 1;
-    _xp = prefs.getInt('xp') ?? 0;
+    _currentXp = prefs.getInt('xp') ?? 0;
+    _streak = prefs.getInt('streak') ?? 0;
     _hp = prefs.getInt('hp') ?? 100;
-    _priority = prefs.getString('priority') ?? 'Enfoque';
-    _difficulty = prefs.getString('difficulty') ?? 'Medio';
     _isInitialized = prefs.getBool('isInitialized') ?? false;
     
+    // Load attributes
+    for (String key in _attributes.keys) {
+      _attributes[key] = prefs.getDouble('attr_$key') ?? 0.0;
+    }
+
+    // Load achievements (simple version)
+    for (var ach in _achievements) {
+      ach.isUnlocked = prefs.getBool('ach_${ach.id}') ?? false;
+    }
+
     _calculateNextLevelXp();
     notifyListeners();
   }
@@ -41,16 +96,21 @@ class PlayerProvider with ChangeNotifier {
   Future<void> _saveData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('level', _level);
-    await prefs.setInt('xp', _xp);
+    await prefs.setInt('xp', _currentXp);
+    await prefs.setInt('streak', _streak);
     await prefs.setInt('hp', _hp);
-    await prefs.setString('priority', _priority);
-    await prefs.setString('difficulty', _difficulty);
     await prefs.setBool('isInitialized', _isInitialized);
+    
+    for (var entry in _attributes.entries) {
+      await prefs.setDouble('attr_${entry.key}', entry.value);
+    }
+
+    for (var ach in _achievements) {
+      await prefs.setBool('ach_${ach.id}', ach.isUnlocked);
+    }
   }
 
-  void initialize(String priority, String difficulty) {
-    _priority = priority;
-    _difficulty = difficulty;
+  void initialize() {
     _isInitialized = true;
     _saveData();
     notifyListeners();
@@ -60,29 +120,52 @@ class PlayerProvider with ChangeNotifier {
     _nextLevelXp = (100 * math.pow(_level, 1.5)).toInt();
   }
 
-  void completarDesafio(int xpGanada) {
-    _xp += xpGanada;
-    while (_xp >= _nextLevelXp) {
-      _xp -= _nextLevelXp;
+  void addXp(int amount, String category) {
+    _currentXp += amount;
+    
+    // Update attribute
+    if (_attributes.containsKey(category)) {
+      _attributes[category] = (_attributes[category]! + 1.0);
+    }
+
+    // Level up logic
+    while (_currentXp >= _nextLevelXp) {
+      _currentXp -= _nextLevelXp;
       _level++;
       _calculateNextLevelXp();
-      _hp = math.min(100, _hp + 20);
+      _checkAchievements('level_$_level');
     }
+
+    _checkAchievements('first_mission'); // Simplified: any addXp could be a mission
+
     _saveData();
     notifyListeners();
   }
 
-  void updateHp(int delta) {
-    _hp = (_hp + delta).clamp(0, 100);
+  void updateStreak(int newStreak) {
+    _streak = newStreak;
     _saveData();
     notifyListeners();
+  }
+
+  void _checkAchievements(String condition) {
+    for (var ach in _achievements) {
+      if (ach.condicion == condition && !ach.isUnlocked) {
+        ach.isUnlocked = true;
+      }
+    }
   }
 
   void reset() {
     _level = 1;
-    _xp = 0;
+    _currentXp = 0;
+    _streak = 0;
     _hp = 100;
     _isInitialized = false;
+    _attributes.updateAll((key, value) => 0.0);
+    for (var ach in _achievements) {
+      ach.isUnlocked = false;
+    }
     _calculateNextLevelXp();
     _saveData();
     notifyListeners();

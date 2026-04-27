@@ -80,11 +80,13 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> with SingleTickerPr
     final provider = context.read<NoteProvider>();
 
     if (_isEditing) {
-      provider.removeNote(widget.noteToEdit!.id);
+      provider.updateNote(widget.noteToEdit!.id, _titleController.text, _contentController.text);
+      Navigator.pop(context); // Back out of creation screen
+      Navigator.pop(context); // Back out of detail screen
+    } else {
+      provider.addNote(_titleController.text, _contentController.text);
+      Navigator.pop(context);
     }
-    provider.addNote(_titleController.text, _contentController.text);
-    Navigator.pop(context);
-    if (_isEditing) Navigator.pop(context); // Back out of detail screen too
   }
 
   @override

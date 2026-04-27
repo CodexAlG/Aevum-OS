@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:aevum_os/providers/player_provider.dart';
+import 'package:provider/provider.dart';
 
 class Habit {
   final String id;
@@ -43,7 +45,7 @@ class DailysProvider with ChangeNotifier {
       final List<dynamic> decoded = jsonDecode(habitsJson);
       _habits = decoded.map((h) => Habit.fromJson(h)).toList();
     } else {
-      _habits = []; // Empty initially to force definition
+      _habits = [];
     }
     notifyListeners();
   }
@@ -74,10 +76,23 @@ class DailysProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleHabit(String id) {
+  void toggleHabit(String id, BuildContext context) {
     final index = _habits.indexWhere((h) => h.id == id);
     if (index != -1) {
-      _habits[index].isCompleted = !_habits[index].isCompleted;
+      final wasCompleted = _habits[index].isCompleted;
+      _habits[index].isCompleted = !wasCompleted;
+      
+      if (!wasCompleted) {
+        // Gain XP
+        context.read<PlayerProvider>().addXp(10, 'Constancia');
+        
+        // Check for streak
+        if (_habits.every((h) => h.isCompleted)) {
+          final player = context.read<PlayerProvider>();
+          player.updateStreak(player.streak + 1);
+        }
+      }
+
       _saveHabits();
       notifyListeners();
     }

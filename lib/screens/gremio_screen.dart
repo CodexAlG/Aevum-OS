@@ -154,8 +154,15 @@ class _GremioScreenState extends State<GremioScreen> {
         child: InkWell(
           onTap: () {
             HapticFeedback.heavyImpact();
-            context.read<PlayerProvider>().completarDesafio(mission.xp);
+            context.read<PlayerProvider>().addXp(mission.xp, mission.attribute);
             context.read<MissionProvider>().completeMission(mission.id);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('MISIÓN COMPLETADA: +${mission.xp} XP EN ${mission.attribute.toUpperCase()}'),
+                backgroundColor: AppColors.primary,
+                duration: const Duration(seconds: 2),
+              ),
+            );
           },
           onLongPress: () => _showDeleteConfirm(context, mission),
           borderRadius: BorderRadius.circular(28),
@@ -187,7 +194,7 @@ class _GremioScreenState extends State<GremioScreen> {
                               style: const TextStyle(fontSize: 11, color: AppColors.textSub)),
                         ),
                       const SizedBox(height: 4),
-                      Text('RANGO ${mission.rank}  •  +${mission.xp} XP',
+                      Text('RANGO ${mission.rank}  •  ${mission.attribute.toUpperCase()}  •  +${mission.xp} XP',
                           style: TextStyle(fontSize: 10, color: rankColor, fontWeight: FontWeight.bold)),
                     ],
                   ),
@@ -230,6 +237,9 @@ class _GremioScreenState extends State<GremioScreen> {
     String rank = 'E';
     int xp = 50;
     String category = _selectedCategory;
+    String attribute = 'Enfoque';
+
+    final List<String> attributes = ['Fuerza', 'Logica', 'Sabiduria', 'Constancia', 'Enfoque', 'Vitalidad'];
 
     showModalBottomSheet(
       context: context,
@@ -294,6 +304,41 @@ class _GremioScreenState extends State<GremioScreen> {
                     ),
                     const SizedBox(height: 24),
 
+                    // Attribute selector
+                    const Text('ATRIBUTO A POTENCIAR',
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSub, letterSpacing: 2)),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 40,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: attributes.map((attr) {
+                          bool sel = attribute == attr;
+                          return GestureDetector(
+                            onTap: () => setModalState(() => attribute = attr),
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: sel ? AppColors.primary : AppColors.surface,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                attr.toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: sel ? AppColors.surface : AppColors.textSub,
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
                     // Rank selector
                     const Text('DIFICULTAD / RANGO',
                         style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSub, letterSpacing: 2)),
@@ -347,13 +392,14 @@ class _GremioScreenState extends State<GremioScreen> {
                         onPressed: () {
                           if (titleController.text.isNotEmpty) {
                             context.read<MissionProvider>().addMission(Mission(
-                              id: DateTime.now().millisecondsSinceEpoch.toString(),
-                              title: titleController.text.toUpperCase(),
-                              description: descController.text,
-                              category: category,
-                              xp: xp,
-                              rank: rank,
-                            ));
+                                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                                  title: titleController.text.toUpperCase(),
+                                  description: descController.text,
+                                  category: category,
+                                  xp: xp,
+                                  rank: rank,
+                                  attribute: attribute,
+                                ));
                             setState(() => _selectedCategory = category);
                             Navigator.pop(sheetCtx);
                           }

@@ -9,6 +9,7 @@ class Mission {
   final String category;
   final int xp;
   final String rank;
+  final String attribute;
   bool isDone;
 
   Mission({
@@ -18,6 +19,7 @@ class Mission {
     required this.category,
     required this.xp,
     required this.rank,
+    required this.attribute,
     this.isDone = false,
   });
 
@@ -28,6 +30,7 @@ class Mission {
     'category': category,
     'xp': xp,
     'rank': rank,
+    'attribute': attribute,
     'isDone': isDone,
   };
 
@@ -38,6 +41,7 @@ class Mission {
     category: json['category'],
     xp: json['xp'],
     rank: json['rank'],
+    attribute: json['attribute'] ?? 'Enfoque',
     isDone: json['isDone'],
   );
 }
@@ -45,7 +49,8 @@ class Mission {
 class MissionProvider with ChangeNotifier {
   List<Mission> _missions = [];
 
-  List<Mission> get missions => _missions;
+  List<Mission> get missions => _missions.where((m) => !m.isDone).toList();
+  List<Mission> get completedMissions => _missions.where((m) => m.isDone).toList();
 
   MissionProvider() {
     _loadMissions();
@@ -58,11 +63,7 @@ class MissionProvider with ChangeNotifier {
       final List<dynamic> decoded = jsonDecode(missionsJson);
       _missions = decoded.map((m) => Mission.fromJson(m)).toList();
     } else {
-      _missions = [
-        Mission(id: '1', title: 'HIDRATACIÓN', description: 'Beber al menos 2 litros de agua al día.', category: 'Diarias', xp: 50, rank: 'E'),
-        Mission(id: '2', title: 'LECTURA TÉCNICA', description: 'Leer documentación o artículos de ingeniería.', category: 'Diarias', xp: 120, rank: 'B'),
-        Mission(id: '3', title: 'CÓDIGO PURO', description: 'Completar un módulo funcional sin deuda técnica.', category: 'Corto Plazo', xp: 300, rank: 'S'),
-      ];
+      _missions = []; // Start empty as requested
     }
     notifyListeners();
   }

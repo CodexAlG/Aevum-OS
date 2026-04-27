@@ -107,7 +107,7 @@ class DailysScreen extends StatelessWidget {
         ),
       ),
       child: InkWell(
-        onTap: () => context.read<DailysProvider>().toggleHabit(habit.id),
+        onTap: () => context.read<DailysProvider>().toggleHabit(habit.id, context),
         borderRadius: BorderRadius.circular(24),
         child: Padding(
           padding: const EdgeInsets.all(20.0),
