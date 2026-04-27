@@ -69,6 +69,7 @@ class PlayerProvider with ChangeNotifier {
 
   PlayerProvider() {
     _loadData();
+    reset(); // FORCED RESET AS REQUESTED
   }
 
   Future<void> _loadData() async {
@@ -84,7 +85,7 @@ class PlayerProvider with ChangeNotifier {
       _attributes[key] = prefs.getDouble('attr_$key') ?? 0.0;
     }
 
-    // Load achievements (simple version)
+    // Load achievements
     for (var ach in _achievements) {
       ach.isUnlocked = prefs.getBool('ach_${ach.id}') ?? false;
     }
