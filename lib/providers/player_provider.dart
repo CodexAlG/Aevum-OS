@@ -110,8 +110,16 @@ class PlayerProvider with ChangeNotifier {
     }
   }
 
-  void initialize() {
+  void initialize([String? priority, String? difficulty]) {
     _isInitialized = true;
+    
+    // Give a starting boost based on priority
+    if (priority != null) {
+      if (priority == 'Enfoque') addXp(50, 'Enfoque');
+      if (priority == 'Fuerza') addXp(50, 'Fuerza');
+      if (priority == 'Disciplina') addXp(50, 'Constancia');
+    }
+    
     _saveData();
     notifyListeners();
   }
